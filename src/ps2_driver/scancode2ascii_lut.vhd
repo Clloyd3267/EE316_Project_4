@@ -25,7 +25,8 @@ begin
 
 	with code select
 		data <=  X"60" when X"00E", -- '
-					X"7E" when X"10E", -- ~
+		            X"7E" when X"10E", -- ~
+					X"20" when X"029", -- " "
 					X"31" when X"016", -- 1
 					X"32" when X"01E", -- 2
 					X"33" when X"026", -- 3

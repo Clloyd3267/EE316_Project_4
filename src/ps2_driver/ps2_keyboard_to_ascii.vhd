@@ -137,7 +137,7 @@ begin
 
     O_SCANCODE     => s_scancode,
     O_NEW_SCANCODE => s_new_scancode
-  )
+  );
 
   -- Device driver for PS/2 Scancode to Ascii converter
   SCAN_TO_ASCII_LUT_INST: scancode2ascii_lut
@@ -159,8 +159,8 @@ begin
   )
   port map
   (
-    I_CLK          => I_CLK_125_MHZ,
-    I_RESET_N      => s_reset_n,
+    I_CLK          => I_CLK,
+    I_RESET_N      => I_RESET_N,
     I_SIGNAL       => s_new_scancode,
     O_EDGE_SIGNAL  => s_rise_new_scancode
   );
@@ -175,17 +175,18 @@ begin
   SCANCODE_DECODER: process (I_CLK, I_RESET_N)
   begin
     if (I_RESET_N = '0') then
-      s_break_en = '0';
-      s_ex0_en = '0';
-      s_caps_en = '0';
-      s_shift_en = '0';
-      s_ctrl_en = '0';
-      s_alt_en = '0';
+      s_break_en <= '0';
+      s_ex0_en <= '0';
+      s_caps_en <= '0';
+      s_shift_en <= '0';
+      s_ctrl_en <= '0';
+      s_alt_en <= '0';
 
     elsif (rising_edge(I_CLK)) then
+      O_NEW_ASCII <= '0';
       if (s_rise_new_scancode = '1') then
         -- Disable ascii valid flag
-        O_NEW_ASCII <= '0';
+--        O_NEW_ASCII <= '0';
 
         if    (s_scancode = x"F0") then  -- Break code
           s_break_en <= '1';
@@ -199,7 +200,7 @@ begin
           -- Caps key pressed (no break/extended)
           if    ((s_scancode = C_CAPS_CODE) and
                  (s_break_en = '0') and
-                 (s_ex0_en = '0') then
+                 (s_ex0_en = '0')) then
             s_caps_en <= not s_caps_en;
 
           -- Shift key pressed (R or L, no extended)
