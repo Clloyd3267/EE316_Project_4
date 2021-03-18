@@ -94,6 +94,7 @@ architecture behavioral of ps2_keyboard_driver is
   signal s_debounced_ps2_data_prev : std_logic;
   signal s_debounced_ps2_clk_prev  : std_logic;
   signal s_fall_edge_ps2_clk       : std_logic;
+  signal s_scancode                : std_logic_vector(7 downto 0);
 
 begin
   ------------------------------
@@ -139,8 +140,8 @@ begin
   )
   port map
   (
-    I_CLK          => I_CLK_125_MHZ,
-    I_RESET_N      => s_reset_n,
+    I_CLK          => I_CLK,
+    I_RESET_N      => I_RESET_N,
     I_SIGNAL       => s_debounced_ps2_clk,
     O_EDGE_SIGNAL  => s_fall_edge_ps2_clk
   );
@@ -152,13 +153,13 @@ begin
   -- Useful Outputs   : s_ps2_shift_reg : The shift register storing scancodes.
   -- Description      : Process to shift input into scancode shift register.
   ------------------------------------------------------------------------------
-  PS2_SHIFT_REG: process (I_CLK, I_RESET_N)
+  PS2_SHIFT_REG: process (s_debounced_ps2_clk, I_RESET_N)
   begin
     if (I_RESET_N = '0') then
       s_ps2_shift_reg   <= (others=>'0');
-
-    elsif (rising_edge(I_CLK)) then
-      if (s_fall_edge_ps2_clk = '1') then
+    else
+--    elsif (rising_edge(I_CLK)) then
+      if (s_debounced_ps2_clk'event and s_debounced_ps2_clk = '0') then
 
         -- Shift input into current data frame
         s_ps2_shift_reg <= s_debounced_ps2_data & s_ps2_shift_reg(10 downto 1);
@@ -205,8 +206,7 @@ begin
   ------------------------------------------------------------------------------
 
   -- Verify that the parity, start, and stop bits are all correct -- CDL=> Verify later
-  s_parity_error <= not (not s_ps2_shift_reg(0) and
-                             s_ps2_shift_reg(10) and (
+  s_parity_error <= not (not s_ps2_shift_reg(0) and s_ps2_shift_reg(10) and (
                              s_ps2_shift_reg(9) xor
                              s_ps2_shift_reg(8) xor
                              s_ps2_shift_reg(7) xor
