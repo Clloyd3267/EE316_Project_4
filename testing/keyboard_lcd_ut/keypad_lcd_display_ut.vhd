@@ -30,7 +30,7 @@ port
 
   I_PS2_DATA   : in std_logic;
   I_PS2_CLK    : in std_logic;
-  
+
   -- Pass through external signals
   O_LCD_DATA       : out std_logic_vector(7 downto 0);
   O_LCD_ENABLE     : out std_logic;
@@ -77,7 +77,7 @@ architecture behavioral of keypad_lcd_display_ut is
     O_LCD_RW         : out std_logic
   );
   end component lcd_display_driver;
-  
+
 --    component ps2_keyboard_to_ascii IS
 --  GENERIC(
 --      clk_freq                  : INTEGER := 50_000_000; --system clock frequency in Hz
@@ -88,7 +88,7 @@ architecture behavioral of keypad_lcd_display_ut is
 --      ps2_data   : IN  STD_LOGIC;                     --data signal from PS2 keyboard
 --      ascii_new  : OUT STD_LOGIC;                     --output flag indicating new ASCII value
 --      ascii_code : OUT STD_LOGIC_VECTOR(6 DOWNTO 0)); --ASCII value
---END component ps2_keyboard_to_ascii;  
+--END component ps2_keyboard_to_ascii;
 component ps2_keyboard_to_ascii is
 generic
 (
@@ -160,7 +160,7 @@ end component ps2_keyboard_to_ascii;
   signal s_display_data   : t_lcd_display_data;             -- Data to be displayed on LCD
   signal s_lcd_busy       : std_logic;                      -- Busy signal from LCD
   signal s_reset_n        : std_logic;                      -- Active low reset signal
-  
+
   signal s_ascii_new      : std_logic;
   signal s_ascii_code     : std_logic_vector(7 downto 0);
   signal s_ascii_cntr     : integer range 0 to 31;
@@ -191,7 +191,7 @@ begin
     O_LCD_RS         => O_LCD_RS,
     O_LCD_RW         => O_LCD_RW
   );
-  
+
  -- User logic display driver for PS2 keyboard
   PS2_KEYBOARD_INST: ps2_keyboard_to_ascii
   generic map
@@ -237,11 +237,15 @@ begin
 --                         C_SP, C_SP);
         if (s_ascii_new = '1') then
             if (s_ascii_code = x"08") then -- Backspace
-                s_display_data(31 - (s_ascii_cntr - 1))   <= x"20";
-                s_ascii_cntr <= s_ascii_cntr - 1;
+                if (s_ascii_cntr /= 0) then
+                    s_display_data(31 - (s_ascii_cntr - 1))   <= x"20";
+                    s_ascii_cntr <= s_ascii_cntr - 1;
+                end if;
             else
-                s_ascii_cntr <= s_ascii_cntr + 1;
-                s_display_data(31 - s_ascii_cntr)   <= s_ascii_code;
+                if (s_ascii_cntr /= 31) then
+                    s_ascii_cntr <= s_ascii_cntr + 1;
+                    s_display_data(31 - s_ascii_cntr)   <= s_ascii_code;
+                end if;
             end if;
         else
             s_display_data <= s_display_data;
