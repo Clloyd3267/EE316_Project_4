@@ -137,6 +137,11 @@ begin
 					X"2D" when X"07B", -- KP-
 					X"2B" when X"079", -- KP+
 					X"2E" when X"071", -- KP.
+					X"10" when X"005", -- FN1
+					X"11" when X"006", -- FN2
+					X"12" when X"004", -- FN3
+					X"13" when X"00C", -- FN4
+					X"14" when X"003", -- FN5					
 					X"00" when others;
 
 	-- ctrl key zeroes out bits 5 and 6
